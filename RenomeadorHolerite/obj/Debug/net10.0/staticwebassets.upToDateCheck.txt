@@ -1,0 +1,4 @@
+wwwroot\images.jpg
+wwwroot\image_0.png
+wwwroot\index.html
+C:\Users\zj7\Pessoal\Renomea\RenomeadorHolerite\wwwroot\index.html

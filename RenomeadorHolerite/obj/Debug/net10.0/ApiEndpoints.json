@@ -1,0 +1,12 @@
+[
+  {
+    "ContainingType": "RenomeadorHolerite.Controllers.UploadController",
+    "Method": "ProcessarArquivos",
+    "RelativePath": "upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

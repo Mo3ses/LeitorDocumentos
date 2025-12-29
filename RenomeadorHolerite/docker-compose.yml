@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  renomeador-app:
+    container_name: renomeador-holerite
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # A porta da esquerda é a que você acessa no navegador
+    restart: unless-stopped
