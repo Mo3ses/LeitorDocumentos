@@ -1,0 +1,15 @@
+# Ignorar pastas de build do .NET
+**/bin/
+**/obj/
+
+# Ignorar configurações de editor
+.vscode/
+.vs/
+*.user
+
+# Ignorar git
+.git/
+
+# Ignorar PDFs de teste que você possa ter na pasta
+*.pdf
+*.zip

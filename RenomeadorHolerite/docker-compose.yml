@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   renomeador-app:
     container_name: renomeador-holerite
