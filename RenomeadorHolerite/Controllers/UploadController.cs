@@ -52,17 +52,14 @@ namespace RenomeadorHolerite.Controllers
                         }
                         else
                         {
-                            // --- ALTERAÇÃO AQUI ---
-                            // Define o sufixo em CAIXA ALTA baseado no tipo selecionado
                             string sufixo = (tipoDoc == "comprovante")
-                                ? "_COMPROVANTE.pdf"
-                                : "_HOLERITE.pdf";
+                                ? " COMPROVANTE.pdf"
+                                : " HOLERITE.pdf";
 
                             novoNome = $"{novoNome}{sufixo}";
                             // ----------------------
                         }
 
-                        // Lógica para evitar nomes duplicados (ex: ADRIANA_HOLERITE_1.pdf)
                         var nomeBase = Path.GetFileNameWithoutExtension(novoNome);
                         var ext = Path.GetExtension(novoNome);
                         var nomeFinal = novoNome;

@@ -1,5 +1,7 @@
 ﻿using UglyToad.PdfPig;
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Globalization;
 
 namespace RenomeadorHolerite.Services
 {
@@ -55,16 +57,39 @@ namespace RenomeadorHolerite.Services
 
         private string LimparNome(string nomeBruto)
         {
-            var nomeEncontrado = nomeBruto.Trim();
+            var nome = nomeBruto.Trim();
 
             var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO" };
             foreach (var s in sujeiras)
             {
-                if (nomeEncontrado.Contains(s, StringComparison.OrdinalIgnoreCase))
-                    nomeEncontrado = nomeEncontrado.Replace(s, "", StringComparison.OrdinalIgnoreCase).Trim();
+                if (nome.Contains(s, StringComparison.OrdinalIgnoreCase))
+                    nome = nome.Replace(s, "", StringComparison.OrdinalIgnoreCase).Trim();
             }
 
-            return Regex.Replace(nomeEncontrado, @"[^a-zA-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]", "").Trim();
+            nome = RemoverAcentos(nome);
+
+            return Regex.Replace(nome, @"[^a-zA-Z\s]", "").Trim();
+        }
+
+        private string RemoverAcentos(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return texto;
+
+            // Normaliza para separar as letras dos acentos (Ex: 'ç' vira 'c' + '¸')
+            var normalizedString = texto.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                // Se não for um acento/sinal, adiciona na string final
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
     }
 }
