@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 using RenomeadorHolerite.Services;
+using UglyToad.PdfPig; // Precisamos disso aqui para o Debug
 
 namespace RenomeadorHolerite.Controllers
 {
@@ -36,33 +37,47 @@ namespace RenomeadorHolerite.Controllers
 
                     string novoNome = "";
                     string status = "Renomeado";
+                    string debugTexto = ""; // Variável para guardar o texto bruto
 
                     using (var fileMemoryStream = new MemoryStream())
                     {
                         await file.CopyToAsync(fileMemoryStream);
                         fileMemoryStream.Position = 0;
 
-                        // Chama o serviço para descobrir o nome da pessoa
+                        // 1. Tenta extrair o nome
                         novoNome = _pdfService.ExtrairNome(fileMemoryStream, tipoDoc);
+
+                        // 2. DEBUG: Lê o texto cru para mostrar no site caso precise investigar
+                        fileMemoryStream.Position = 0;
+                        try
+                        {
+                            using var docDebug = PdfDocument.Open(fileMemoryStream);
+                            if (docDebug.NumberOfPages > 0)
+                            {
+                                // Pega os primeiros 500 caracteres da pág 1 para não ficar gigante
+                                string rawText = docDebug.GetPage(1).Text;
+                                debugTexto = rawText.Length > 800 ? rawText.Substring(0, 800) + "..." : rawText;
+                            }
+                        }
+                        catch { debugTexto = "Erro ao ler texto para debug."; }
+
 
                         if (string.IsNullOrWhiteSpace(novoNome))
                         {
                             novoNome = $"NAO_IDENTIFICADO_{file.FileName}";
-                            status = "Não Identificado";
+                            status = "Falha (Clique em Ver Texto)";
                         }
                         else
                         {
-                            // --- ALTERAÇÃO AQUI ---
-                            // Define o sufixo em CAIXA ALTA baseado no tipo selecionado
-                            string sufixo = (tipoDoc == "comprovante")
-                                ? "_COMPROVANTE.pdf"
-                                : "_HOLERITE.pdf";
+                            string sufixo = "";
+                            if (tipoDoc == "comprovante") sufixo = " COMPROVANTE.pdf";
+                            else if (tipoDoc == "recibo") sufixo = " RECIBO.pdf";
+                            else sufixo = " HOLERITE.pdf";
 
                             novoNome = $"{novoNome}{sufixo}";
-                            // ----------------------
                         }
 
-                        // Lógica para evitar nomes duplicados (ex: ADRIANA_HOLERITE_1.pdf)
+                        // Lógica de Duplicatas
                         var nomeBase = Path.GetFileNameWithoutExtension(novoNome);
                         var ext = Path.GetExtension(novoNome);
                         var nomeFinal = novoNome;
@@ -76,7 +91,15 @@ namespace RenomeadorHolerite.Controllers
                         }
 
                         nomesUsados.Add(nomeFinal);
-                        relatorio.Add(new { original = file.FileName, novo = nomeFinal, status = status });
+
+                        // Adicionamos o campo 'debug' na resposta JSON
+                        relatorio.Add(new
+                        {
+                            original = file.FileName,
+                            novo = nomeFinal,
+                            status = status,
+                            debug = debugTexto
+                        });
 
                         var entry = archive.CreateEntry(nomeFinal);
                         using var entryStream = entry.Open();

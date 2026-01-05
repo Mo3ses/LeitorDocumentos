@@ -3,248 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renomeador Pro V3</title>
+    <title>Renomeador 2000 Professional Edition</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f2f5;
+            background-color: #008080; /* Azul petróleo clássico do Windows 95/98 */
+            font-family: 'Verdana', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
 
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        /* Janela Estilo Windows 98 */
+        .window {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 800px;
+            padding: 2px;
         }
 
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* Seleção de Tipo */
-        .type-selector {
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            padding: 4px 8px;
+            color: white;
+            font-weight: bold;
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .type-option {
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            cursor: pointer;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: 2px solid #ddd;
-            transition: 0.2s;
         }
 
-            .type-option:hover {
-                background: #e9ecef;
-            }
+        .title-bar-text {
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
 
-            .type-option input {
-                margin-right: 10px;
-                accent-color: #3498db;
-                transform: scale(1.2);
-            }
+        .window-body {
+            padding: 15px;
+        }
 
-            .type-option.selected {
-                border-color: #3498db;
-                background: #eaf6ff;
-                color: #2c3e50;
-                font-weight: bold;
-            }
+        /* Marquee (Texto correndo) */
+        .marquee-container {
+            background: black;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            border: 2px inset white;
+            margin-bottom: 20px;
+            padding: 5px;
+        }
 
-        .drop-zone {
-            border: 2px dashed #3498db;
-            background: #f0f8ff;
-            padding: 40px;
-            text-align: center;
-            border-radius: 8px;
+        /* Botões Retro 3D */
+        .retro-btn {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 8px 15px;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
+            margin: 5px;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 12px;
+        }
+
+            .retro-btn:active {
+                border-color: #808080 #ffffff #ffffff #808080;
+                transform: translateY(1px);
+            }
+
+            .retro-btn:hover {
+                background: #dcdcdc;
+            }
+
+        /* Área de Drop */
+        .drop-zone {
+            background: white;
+            border: 2px inset #808080;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 15px;
+            cursor: pointer;
         }
 
             .drop-zone:hover {
-                background: #e1f0fa;
-                border-color: #2980b9;
+                background: #ffffcc;
             }
 
-        .btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 6px;
-            margin-top: 20px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-            .btn:hover {
-                background: #2980b9;
-            }
-
-        /* Tabela */
-        .result-area {
-            margin-top: 30px;
-            display: none;
-        }
-
+        /* Tabela Retro */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            border: 2px solid gray;
+            background: white;
+            font-size: 12px;
         }
 
         th {
-            background-color: #f8f9fa;
+            background: #c0c0c0;
+            border: 1px solid gray;
+            padding: 5px;
+            text-align: left;
         }
 
+        td {
+            border: 1px solid gray;
+            padding: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Status */
         .status-ok {
-            color: green;
+            color: #008000;
             font-weight: bold;
         }
 
         .status-err {
-            color: orange;
+            color: #ff0000;
             font-weight: bold;
+            text-decoration: blink;
         }
 
-        /* Overlays (Loading e Sucesso) */
+        /* Overlay Retro */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(0, 0, 0, 0.8);
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            z-index: 1000;
+            z-index: 9999;
         }
 
-        /* Animação do Spinner */
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .loading-box {
+            background: #c0c0c0;
+            border: 2px outset white;
+            padding: 20px;
+            text-align: center;
+            width: 300px;
         }
 
-        @keyframes spin {
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: white;
+            border: 2px inset gray;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #000080;
+            width: 0%;
+            animation: load 2s infinite;
+        }
+
+        @keyframes load {
             0% {
-                transform: rotate(0deg);
+                width: 0%;
             }
 
             100% {
-                transform: rotate(360deg);
+                width: 100%;
             }
         }
 
-        /* Imagem de Sucesso */
-        .success-img-new {
-            width: 500px; /* AUMENTEI AQUI */
-            max-width: 90%; /* Garante que não estoure em telas pequenas */
-            height: auto;
-            margin-bottom: 20px;
+        /* Imagem Social Credit */
+        .meme-img {
+            max-width: 400px;
+            border: 5px ridge gold;
+            margin-bottom: 15px;
+        }
+
+        /* Seleção de Tipo (Radio Buttons) */
+        .radio-group {
+            background: #d4d0c8;
+            border: 2px groove white;
+            padding: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
 
     <div class="overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div style="margin-top:15px; font-weight:bold; color:#333">Processando arquivos...</div>
+        <div class="loading-box">
+            <p>Processando Arquivos.exe...</p>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            <p style="font-size: 10px; margin-top: 5px;">Por favor aguarde...</p>
+        </div>
     </div>
 
     <div class="overlay" id="successOverlay">
-        <img src="image_0.png" class="success-img-new" alt="+30,000,000 Social Credit">
-        <h2 style="color: #27ae60;">Concluído!</h2>
+        <div style="text-align: center;">
+            <img src="image_0.png" class="meme-img" alt="Social Credit">
+            <br>
+            <button class="retro-btn" style="font-size: 16px; padding: 10px 30px;" onclick="closeOverlay()">OK</button>
+        </div>
     </div>
 
-    <div class="container">
-        <h1>📄 Renomeador de Documentos</h1>
+    <div class="window">
+        <div class="title-bar">
+            <span class="title-bar-text">Renomeador Pro v4.0 - Build 2025</span>
+            <div style="background: #c0c0c0; color: black; padding: 0 4px; font-weight: bold; border: 1px outset white;">X</div>
+        </div>
 
-        <form id="uploadForm">
-            <div class="type-selector">
-                <label class="type-option selected">
-                    <input type="radio" name="tipoDoc" value="holerite" checked onchange="updateSelection(this)">
-                    Holerite
-                </label>
-                <label class="type-option">
-                    <input type="radio" name="tipoDoc" value="comprovante" onchange="updateSelection(this)">
-                    Comprovante Bancário
-                </label>
+        <div class="window-body">
+
+            <div class="marquee-container">
+                <marquee scrollamount="5" scrolldelay="100">
+                    *** BEM-VINDO AO SISTEMA *** RENOMEIE SEUS ARQUIVOS COM SEGURANÇA *** NÃO DESLIGUE O COMPUTADOR ***
+                </marquee>
             </div>
 
-            <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-                <h3>Clique ou arraste os arquivos aqui</h3>
-                <p id="fileStatus">Nenhum arquivo selecionado</p>
-                <input type="file" id="fileInput" multiple accept=".pdf" style="display: none" onchange="updateCount()">
+            <form id="uploadForm">
+                <fieldset class="radio-group">
+                    <legend>Tipo de Documento</legend>
+                    <label style="margin-right: 15px; cursor: pointer;">
+                        <input type="radio" name="tipoDoc" value="holerite" checked> 📁 Holerite
+                    </label>
+                    <label style="margin-right: 15px; cursor: pointer;">
+                        <input type="radio" name="tipoDoc" value="comprovante"> 🏦 Comprovante
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="tipoDoc" value="recibo"> 🏖️ Recibo Férias
+                    </label>
+                </fieldset>
+
+                <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+                    <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" width="32">
+                    <p><b>Clique aqui</b> para selecionar os arquivos PDF</p>
+                    <p id="fileStatus" style="color: blue;">Nenhum arquivo selecionado</p>
+                    <input type="file" id="fileInput" multiple accept=".pdf" style="display: none" onchange="updateCount()">
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="submit" class="retro-btn">💾 INICIAR PROCESSAMENTO</button>
+                </div>
+            </form>
+
+            <hr style="border: 1px inset white; margin: 15px 0;">
+
+            <div class="result-area" id="resultArea" style="display:none;">
+                <p><b>Relatório de Saída:</b></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Arquivo Original</th>
+                            <th>Novo Nome</th>
+                            <th>Status</th>
+                            <th>Debug</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
             </div>
+        </div>
 
-            <button type="submit" class="btn">Processar e Baixar</button>
-        </form>
-
-        <div class="result-area" id="resultArea">
-            <h3>📊 Resultado</h3>
-            <table>
-                <thead>
-                    <tr><th>Nome Original</th><th>Novo Nome</th><th>Status</th></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <div style="padding: 5px; font-size: 10px; color: #555; border-top: 1px solid #808080;">
+            Desenvolvido em C# .NET 10 | Microsoft Corp. (c) 1995-2025
         </div>
     </div>
 
     <script>
-        function updateSelection(radio) {
-            document.querySelectorAll('.type-option').forEach(el => el.classList.remove('selected'));
-            radio.parentElement.classList.add('selected');
-        }
-
         function updateCount() {
             const count = document.getElementById('fileInput').files.length;
-            document.getElementById('fileStatus').innerText = count > 0 ? `${count} arquivos selecionados` : "Nenhum arquivo selecionado";
+            document.getElementById('fileStatus').innerText = count > 0 ? `${count} arquivos na fila` : "Nenhum arquivo selecionado";
+        }
+
+        function closeOverlay() {
+            document.getElementById('successOverlay').style.display = 'none';
+        }
+
+        function showDebug(text) {
+            // Abre uma janelinha pop-up com o texto cru
+            const win = window.open("", "Debug", "width=600,height=400");
+            win.document.write("<pre style='white-space: pre-wrap; font-family: monospace;'>" + text + "</pre>");
         }
 
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const files = document.getElementById('fileInput').files;
-            if (files.length === 0) return alert("Selecione arquivos primeiro!");
+            if (files.length === 0) return alert("ERRO: Insira o disco na unidade (Selecione arquivos).");
 
             const tipoDoc = document.querySelector('input[name="tipoDoc"]:checked').value;
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const successOverlay = document.getElementById('successOverlay');
+            const loading = document.getElementById('loadingOverlay');
+            const success = document.getElementById('successOverlay');
             const resultArea = document.getElementById('resultArea');
             const tableBody = document.getElementById('tableBody');
 
-            // 1. Mostra Loading
-            loadingOverlay.style.display = "flex";
+            loading.style.display = "flex";
             resultArea.style.display = "none";
             tableBody.innerHTML = "";
 
@@ -254,33 +309,41 @@
 
             try {
                 const response = await fetch('/upload', { method: 'POST', body: formData });
-                if (!response.ok) throw new Error("Erro no servidor");
+                if (!response.ok) throw new Error("Falha na comunicação com o servidor.");
                 const data = await response.json();
 
-                // 2. BACKEND TERMINOU: Esconde Loading e Mostra Sucesso
-                loadingOverlay.style.display = "none";
-                successOverlay.style.display = "flex";
+                loading.style.display = "none";
+                success.style.display = "flex";
 
-                // 3. Espera 1.5 segundo (aumentei um pouquinho pra dar tempo de ler o meme)
+                // Preenche a tabela
+                data.lista.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const classeStatus = item.status.includes("Falha") ? "status-err" : "status-ok";
+
+                    // Escapa as aspas para não quebrar o HTML do botão
+                    const safeDebug = item.debug.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+                    tr.innerHTML = `
+                            <td>${item.original}</td>
+                            <td>${item.novo}</td>
+                            <td class="${classeStatus}">${item.status}</td>
+                            <td style="text-align:center;">
+                                <button class="retro-btn" style="font-size:10px;" onclick='showDebug(${JSON.stringify(item.debug)})'>🔍 VER</button>
+                            </td>
+                        `;
+                    tableBody.appendChild(tr);
+                });
+
+                resultArea.style.display = "block";
+
+                // Download automático após fechar o overlay ou após delay
                 setTimeout(() => {
-                    successOverlay.style.display = "none";
-
-                    // Mostra Tabela
-                    data.lista.forEach(item => {
-                        const tr = document.createElement('tr');
-                        const classeStatus = item.status.includes("Não") ? "status-err" : "status-ok";
-                        tr.innerHTML = `<td>${item.original}</td><td>${item.novo}</td><td class="${classeStatus}">${item.status}</td>`;
-                        tableBody.appendChild(tr);
-                    });
-                    resultArea.style.display = "block";
-
-                    // Baixa o arquivo
-                    downloadBase64File(data.arquivoZip, `documentos_${tipoDoc}.zip`);
-                }, 1500);
+                    downloadBase64File(data.arquivoZip, `arquivos_${tipoDoc}_processados.zip`);
+                }, 2000);
 
             } catch (err) {
-                loadingOverlay.style.display = "none";
-                alert("Erro: " + err.message);
+                loading.style.display = "none";
+                alert("Erro Fatal: " + err.message);
             }
         });
 
