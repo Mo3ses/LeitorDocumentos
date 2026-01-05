@@ -16,12 +16,18 @@ namespace RenomeadorHolerite.Services
 
                 var text = document.GetPage(1).Text;
 
-                // --- SELETOR DE ESTRATÉGIA ---
+                // --- DEBUG NO CONSOLE (Aparece no Portainer) ---
+                Console.WriteLine("========================================");
+                Console.WriteLine($"[DEBUG] Processando Tipo: {tipoDocumento}");
+                Console.WriteLine($"[DEBUG] Texto Bruto (Primeiros 2000 chars): {text.Substring(0, Math.Min(text.Length, 2000)).Replace("\n", " [NL] ")}");
+                Console.WriteLine("========================================");
+                // ------------------------------------------------
+
                 if (tipoDocumento == "comprovante")
                 {
                     return ExtrairDeComprovante(text);
                 }
-                else if (tipoDocumento == "recibo") // <--- NOVO
+                else if (tipoDocumento == "recibo")
                 {
                     return ExtrairDeRecibo(text);
                 }
@@ -30,8 +36,9 @@ namespace RenomeadorHolerite.Services
                     return ExtrairDeHolerite(text);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[ERRO FATAL] {ex.Message}");
                 return "";
             }
         }
@@ -40,7 +47,6 @@ namespace RenomeadorHolerite.Services
         {
             var padrao = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]+)(?=Nome do Funcionário)";
             var match = Regex.Match(text, padrao);
-
             if (match.Success) return LimparNome(match.Groups[1].Value);
             return "";
         }
@@ -49,23 +55,53 @@ namespace RenomeadorHolerite.Services
         {
             var padrao = @"FAVORECIDO[:\s]+(.*?)(?=CPF|\n|$)";
             var match = Regex.Match(text, padrao, RegexOptions.Singleline);
-
             if (match.Success) return LimparNome(match.Groups[1].Value);
             return "";
         }
 
-        // --- NOVA LÓGICA DO RECIBO ---
+        // --- LÓGICA DO RECIBO REFEITA ---
+        // --- SUBSTITUA ESSA FUNÇÃO NO Services/PdfExtractorService.cs ---
         private string ExtrairDeRecibo(string text)
         {
-            // Procura "Nome do empregado", pula linhas e pega o nome até aparecer "AVISO"
-            var padrao = @"Nome do empregado\s+([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]+)(?=AVISO)";
-
-            var match = Regex.Match(text, padrao, RegexOptions.Singleline);
+            // ESTRATÉGIA "CIRÚRGICA": Usar a frase padrão "Recebi da firma" como âncora.
+            // O texto vem colado assim: "2.107,40ARILENE...OLIVEIRARecebi da firma"
+            // A regex procura letras maiúsculas e espaços ([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+) 
+            // que aparecem logo antes de "Recebi da firma".
+            var padraoRecebi = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+)Recebi da firma";
+            var match = Regex.Match(text, padraoRecebi);
 
             if (match.Success)
             {
-                return LimparNome(match.Groups[1].Value);
+                var nome = match.Groups[1].Value.Trim();
+                // Retorna apenas se tiver um tamanho razoável (evita pegar só "A")
+                if (nome.Length > 5) return LimparNome(nome);
             }
+
+            // ESTRATÉGIA RESERVA (RODAPÉ):
+            // O texto no final tem: "ARILENE ... OLIVEIRAONG"
+            // Procura letras maiúsculas antes de "ONG -" ou "ONG - INSTITUTO"
+            var padraoOng = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+)ONG\s?-";
+            match = Regex.Match(text, padraoOng);
+
+            if (match.Success)
+            {
+                var nome = match.Groups[1].Value.Trim();
+                if (nome.Length > 5) return LimparNome(nome);
+            }
+
+            // ESTRATÉGIA "DESESPERO" (Busca por "Nome do empregado" e tenta limpar o lixo numérico)
+            // Se o texto for "...Nome do empregado... 2.107,40NOME DA PESSOA..."
+            var padraoGeral = @"Nome do empregado.*?([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]{10,})";
+            match = Regex.Match(text, padraoGeral);
+            if (match.Success)
+            {
+                // Aqui removemos qualquer coisa que tenha sobrado de números
+                var nomeSujo = match.Groups[1].Value;
+                // Pega a última sequência de letras puras (caso tenha pego "40NOME")
+                var matchLimpo = Regex.Match(nomeSujo, @"[A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$");
+                if (matchLimpo.Success) return LimparNome(matchLimpo.Value);
+            }
+
             return "";
         }
 
@@ -73,7 +109,7 @@ namespace RenomeadorHolerite.Services
         {
             var nome = nomeBruto.Trim();
 
-            var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO", "DO EMPREGADO" };
+            var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO", "DO EMPREGADO", "EMPREGADO" };
             foreach (var s in sujeiras)
             {
                 if (nome.Contains(s, StringComparison.OrdinalIgnoreCase))
@@ -81,7 +117,6 @@ namespace RenomeadorHolerite.Services
             }
 
             nome = RemoverAcentos(nome);
-            // Regex ajustada para permitir letras e espaços
             return Regex.Replace(nome, @"[^a-zA-Z\s]", "").Trim();
         }
 
