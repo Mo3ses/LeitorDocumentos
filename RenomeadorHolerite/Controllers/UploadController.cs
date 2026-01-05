@@ -42,7 +42,6 @@ namespace RenomeadorHolerite.Controllers
                         await file.CopyToAsync(fileMemoryStream);
                         fileMemoryStream.Position = 0;
 
-                        // Chama o serviço para descobrir o nome da pessoa
                         novoNome = _pdfService.ExtrairNome(fileMemoryStream, tipoDoc);
 
                         if (string.IsNullOrWhiteSpace(novoNome))
@@ -52,14 +51,17 @@ namespace RenomeadorHolerite.Controllers
                         }
                         else
                         {
-                            string sufixo = (tipoDoc == "comprovante")
-                                ? " COMPROVANTE.pdf"
-                                : " HOLERITE.pdf";
+                            // --- LÓGICA DOS SUFIXOS ---
+                            string sufixo = "";
+
+                            if (tipoDoc == "comprovante") sufixo = " COMPROVANTE.pdf";
+                            else if (tipoDoc == "recibo") sufixo = " RECIBO.pdf"; // <--- NOVO
+                            else sufixo = " OLERITE.pdf";
 
                             novoNome = $"{novoNome}{sufixo}";
-                            // ----------------------
                         }
 
+                        // Lógica de Duplicatas
                         var nomeBase = Path.GetFileNameWithoutExtension(novoNome);
                         var ext = Path.GetExtension(novoNome);
                         var nomeFinal = novoNome;

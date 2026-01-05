@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renomeador Pro V3</title>
+    <title>Renomeador Pro V4</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -34,8 +34,9 @@
         .type-selector {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .type-option {
@@ -130,7 +131,7 @@
             font-weight: bold;
         }
 
-        /* Overlays (Loading e Sucesso) */
+        /* Overlays */
         .overlay {
             position: fixed;
             top: 0;
@@ -145,7 +146,6 @@
             z-index: 1000;
         }
 
-        /* Animação do Spinner */
         .spinner {
             width: 50px;
             height: 50px;
@@ -165,10 +165,9 @@
             }
         }
 
-        /* Imagem de Sucesso */
         .success-img-new {
-            width: 500px; /* AUMENTEI AQUI */
-            max-width: 90%; /* Garante que não estoure em telas pequenas */
+            width: 500px;
+            max-width: 90%;
             height: auto;
             margin-bottom: 20px;
         }
@@ -182,7 +181,7 @@
     </div>
 
     <div class="overlay" id="successOverlay">
-        <img src="image_0.png" class="success-img-new" alt="+30,000,000 Social Credit">
+        <img src="image_0.png" class="success-img-new" alt="Sucesso">
         <h2 style="color: #27ae60;">Concluído!</h2>
     </div>
 
@@ -198,6 +197,10 @@
                 <label class="type-option">
                     <input type="radio" name="tipoDoc" value="comprovante" onchange="updateSelection(this)">
                     Comprovante Bancário
+                </label>
+                <label class="type-option">
+                    <input type="radio" name="tipoDoc" value="recibo" onchange="updateSelection(this)">
+                    Recibo de Férias
                 </label>
             </div>
 
@@ -243,7 +246,6 @@
             const resultArea = document.getElementById('resultArea');
             const tableBody = document.getElementById('tableBody');
 
-            // 1. Mostra Loading
             loadingOverlay.style.display = "flex";
             resultArea.style.display = "none";
             tableBody.innerHTML = "";
@@ -257,15 +259,11 @@
                 if (!response.ok) throw new Error("Erro no servidor");
                 const data = await response.json();
 
-                // 2. BACKEND TERMINOU: Esconde Loading e Mostra Sucesso
                 loadingOverlay.style.display = "none";
                 successOverlay.style.display = "flex";
 
-                // 3. Espera 1.5 segundo (aumentei um pouquinho pra dar tempo de ler o meme)
                 setTimeout(() => {
                     successOverlay.style.display = "none";
-
-                    // Mostra Tabela
                     data.lista.forEach(item => {
                         const tr = document.createElement('tr');
                         const classeStatus = item.status.includes("Não") ? "status-err" : "status-ok";
@@ -273,8 +271,6 @@
                         tableBody.appendChild(tr);
                     });
                     resultArea.style.display = "block";
-
-                    // Baixa o arquivo
                     downloadBase64File(data.arquivoZip, `documentos_${tipoDoc}.zip`);
                 }, 1500);
 

@@ -16,9 +16,14 @@ namespace RenomeadorHolerite.Services
 
                 var text = document.GetPage(1).Text;
 
+                // --- SELETOR DE ESTRATÉGIA ---
                 if (tipoDocumento == "comprovante")
                 {
                     return ExtrairDeComprovante(text);
+                }
+                else if (tipoDocumento == "recibo") // <--- NOVO
+                {
+                    return ExtrairDeRecibo(text);
                 }
                 else
                 {
@@ -36,16 +41,25 @@ namespace RenomeadorHolerite.Services
             var padrao = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]+)(?=Nome do Funcionário)";
             var match = Regex.Match(text, padrao);
 
-            if (match.Success)
-            {
-                return LimparNome(match.Groups[1].Value);
-            }
+            if (match.Success) return LimparNome(match.Groups[1].Value);
             return "";
         }
 
         private string ExtrairDeComprovante(string text)
         {
             var padrao = @"FAVORECIDO[:\s]+(.*?)(?=CPF|\n|$)";
+            var match = Regex.Match(text, padrao, RegexOptions.Singleline);
+
+            if (match.Success) return LimparNome(match.Groups[1].Value);
+            return "";
+        }
+
+        // --- NOVA LÓGICA DO RECIBO ---
+        private string ExtrairDeRecibo(string text)
+        {
+            // Procura "Nome do empregado", pula linhas e pega o nome até aparecer "AVISO"
+            var padrao = @"Nome do empregado\s+([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ\s]+)(?=AVISO)";
+
             var match = Regex.Match(text, padrao, RegexOptions.Singleline);
 
             if (match.Success)
@@ -59,7 +73,7 @@ namespace RenomeadorHolerite.Services
         {
             var nome = nomeBruto.Trim();
 
-            var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO" };
+            var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO", "DO EMPREGADO" };
             foreach (var s in sujeiras)
             {
                 if (nome.Contains(s, StringComparison.OrdinalIgnoreCase))
@@ -67,28 +81,24 @@ namespace RenomeadorHolerite.Services
             }
 
             nome = RemoverAcentos(nome);
-
+            // Regex ajustada para permitir letras e espaços
             return Regex.Replace(nome, @"[^a-zA-Z\s]", "").Trim();
         }
 
         private string RemoverAcentos(string texto)
         {
             if (string.IsNullOrWhiteSpace(texto)) return texto;
-
-            // Normaliza para separar as letras dos acentos (Ex: 'ç' vira 'c' + '¸')
             var normalizedString = texto.Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder();
 
             foreach (var c in normalizedString)
             {
                 var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                // Se não for um acento/sinal, adiciona na string final
                 if (unicodeCategory != UnicodeCategory.NonSpacingMark)
                 {
                     stringBuilder.Append(c);
                 }
             }
-
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
     }
