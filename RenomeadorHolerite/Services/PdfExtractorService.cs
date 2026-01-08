@@ -117,7 +117,15 @@ namespace RenomeadorHolerite.Services
             }
 
             nome = RemoverAcentos(nome);
-            return Regex.Replace(nome, @"[^a-zA-Z\s]", "").Trim();
+            nome = Regex.Replace(nome, @"[^a-zA-Z\s]", "").Trim();
+
+            // --- CORTE DE SEGURANÇA (MÁXIMO 30 CARACTERES) ---
+            if (nome.Length > 30)
+            {
+                nome = nome.Substring(0, 30).Trim();
+            }
+
+            return nome;
         }
 
         private string RemoverAcentos(string texto)
