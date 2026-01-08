@@ -14,6 +14,12 @@ namespace RenomeadorHolerite.Controllers
         {
             _pdfService = pdfService;
         }
+       
+        [HttpGet("logs")]
+        public IActionResult GetLogs()
+        {
+            return Ok(InMemoryLogger.GetLogs());
+        }
 
         [HttpPost("upload")]
         public async Task<IActionResult> ProcessarArquivos()
