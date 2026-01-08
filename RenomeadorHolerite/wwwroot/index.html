@@ -1,359 +1,215 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renomeador 2000 Professional Edition</title>
+    <title>Renomeador Pro | Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS Base */
         body {
-            background-color: #008080; /* Azul petróleo clássico do Windows 95/98 */
-            font-family: 'Verdana', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Janela Estilo Windows 98 */
-        .window {
-            background-color: #c0c0c0;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 800px;
-            padding: 2px;
+        .main-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
 
-        .title-bar {
-            background: linear-gradient(90deg, #000080, #1084d0);
-            padding: 4px 8px;
-            color: white;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .title-bar-text {
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-
-        .window-body {
-            padding: 15px;
-        }
-
-        /* Marquee (Texto correndo) */
-        .marquee-container {
-            background: black;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            border: 2px inset white;
-            margin-bottom: 20px;
-            padding: 5px;
-        }
-
-        /* Botões Retro 3D */
-        .retro-btn {
-            background: #c0c0c0;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 8px 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 5px;
-            font-family: 'Tahoma', sans-serif;
-            font-size: 12px;
-        }
-
-            .retro-btn:active {
-                border-color: #808080 #ffffff #ffffff #808080;
-                transform: translateY(1px);
-            }
-
-            .retro-btn:hover {
-                background: #dcdcdc;
-            }
-
-        /* Área de Drop */
         .drop-zone {
-            background: white;
-            border: 2px inset #808080;
-            padding: 30px;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
             text-align: center;
-            margin-bottom: 15px;
             cursor: pointer;
+            transition: all 0.3s;
+            background-color: var(--bs-body-bg);
         }
 
             .drop-zone:hover {
-                background: #ffffcc;
+                border-color: #0d6efd;
+                background-color: rgba(13, 110, 253, 0.05);
             }
 
-        /* Tabela Retro */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 2px solid gray;
-            background: white;
-            font-size: 12px;
-        }
-
-        th {
-            background: #c0c0c0;
-            border: 1px solid gray;
-            padding: 5px;
-            text-align: left;
-        }
-
-        td {
-            border: 1px solid gray;
-            padding: 5px;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* Status */
-        .status-ok {
-            color: #008000;
-            font-weight: bold;
-        }
-
-        .status-err {
-            color: #ff0000;
-            font-weight: bold;
-            text-decoration: blink;
-        }
-
-        /* Overlay Retro */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 9999;
-        }
-
-        .loading-box {
-            background: #c0c0c0;
-            border: 2px outset white;
-            padding: 20px;
-            text-align: center;
-            width: 300px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: white;
-            border: 2px inset gray;
-            margin-top: 10px;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #000080;
-            width: 0%;
-            animation: load 2s infinite;
-        }
-
-        @keyframes load {
-            0% {
-                width: 0%;
+            .drop-zone i {
+                font-size: 3rem;
+                color: #6c757d;
+                margin-bottom: 15px;
             }
 
-            100% {
-                width: 100%;
+        .console-output {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Consolas', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            font-size: 0.85em;
+        }
+
+        /* --- MODO ESCURO --- */
+        [data-bs-theme="dark"] body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        [data-bs-theme="dark"] .main-card {
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        [data-bs-theme="dark"] .card-title {
+            color: #fff !important;
+        }
+
+        [data-bs-theme="dark"] .drop-zone {
+            border-color: #444;
+            background-color: #2c2c2c;
+        }
+
+            [data-bs-theme="dark"] .drop-zone:hover {
+                background-color: #333;
+                border-color: #0d6efd;
             }
+
+            [data-bs-theme="dark"] .drop-zone i {
+                color: #adb5bd;
+            }
+
+        [data-bs-theme="dark"] .text-muted {
+            color: #adb5bd !important;
         }
 
-        /* Imagem Social Credit */
-        .meme-img {
-            max-width: 400px;
-            border: 5px ridge gold;
-            margin-bottom: 15px;
+        [data-bs-theme="dark"] .table {
+            color: #e0e0e0;
         }
 
-        /* Seleção de Tipo (Radio Buttons) */
-        .radio-group {
-            background: #d4d0c8;
-            border: 2px groove white;
-            padding: 10px;
-            margin-bottom: 15px;
+        [data-bs-theme="dark"] .table-hover tbody tr:hover {
+            background-color: #333;
+            color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <div class="overlay" id="loadingOverlay">
-        <div class="loading-box">
-            <p>Processando Arquivos.exe...</p>
-            <div class="progress-bar"><div class="progress-fill"></div></div>
-            <p style="font-size: 10px; margin-top: 5px;">Por favor aguarde...</p>
-        </div>
-    </div>
-
-    <div class="overlay" id="successOverlay">
-        <div style="text-align: center;">
-            <img src="image_0.png" class="meme-img" alt="Social Credit">
-            <br>
-            <button class="retro-btn" style="font-size: 16px; padding: 10px 30px;" onclick="closeOverlay()">OK</button>
-        </div>
-    </div>
-
-    <div class="window">
-        <div class="title-bar">
-            <span class="title-bar-text">Renomeador Pro v4.0 - Build 2025</span>
-            <div style="background: #c0c0c0; color: black; padding: 0 4px; font-weight: bold; border: 1px outset white;">X</div>
-        </div>
-
-        <div class="window-body">
-
-            <div class="marquee-container">
-                <marquee scrollamount="5" scrolldelay="100">
-                    *** BEM-VINDO AO SISTEMA *** RENOMEIE SEUS ARQUIVOS COM SEGURANÇA *** NÃO DESLIGUE O COMPUTADOR ***
-                </marquee>
-            </div>
-
-            <form id="uploadForm">
-                <fieldset class="radio-group">
-                    <legend>Tipo de Documento</legend>
-                    <label style="margin-right: 15px; cursor: pointer;">
-                        <input type="radio" name="tipoDoc" value="holerite" checked> 📁 Holerite
-                    </label>
-                    <label style="margin-right: 15px; cursor: pointer;">
-                        <input type="radio" name="tipoDoc" value="comprovante"> 🏦 Comprovante
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="tipoDoc" value="recibo"> 🏖️ Recibo Férias
-                    </label>
-                </fieldset>
-
-                <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-                    <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" width="32">
-                    <p><b>Clique aqui</b> para selecionar os arquivos PDF</p>
-                    <p id="fileStatus" style="color: blue;">Nenhum arquivo selecionado</p>
-                    <input type="file" id="fileInput" multiple accept=".pdf" style="display: none" onchange="updateCount()">
-                </div>
-
-                <div style="text-align: right;">
-                    <button type="submit" class="retro-btn">💾 INICIAR PROCESSAMENTO</button>
-                </div>
-            </form>
-
-            <hr style="border: 1px inset white; margin: 15px 0;">
-
-            <div class="result-area" id="resultArea" style="display:none;">
-                <p><b>Relatório de Saída:</b></p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Arquivo Original</th>
-                            <th>Novo Nome</th>
-                            <th>Status</th>
-                            <th>Debug</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-file-signature me-2"></i>Renomeador Pro</a>
+            <div>
+                <button class="btn btn-outline-light btn-sm me-2" onclick="openLogsModal()">
+                    <i class="fa-solid fa-terminal me-1"></i> Logs
+                </button>
+                <button class="btn btn-outline-light btn-sm" onclick="toggleTheme()" title="Alternar Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
             </div>
         </div>
+    </nav>
 
-        <div style="padding: 5px; font-size: 10px; color: #555; border-top: 1px solid #808080;">
-            Desenvolvido em C# .NET 10 | Microsoft Corp. (c) 1995-2025
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card main-card mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4 text-center">Processamento de Documentos</h4>
+                        <form id="uploadForm">
+                            <div class="mb-4 text-center">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="optHolerite" value="holerite" checked>
+                                    <label class="btn btn-outline-primary" for="optHolerite"><i class="fa-regular fa-folder me-1"></i> Holerite</label>
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="optComprovante" value="comprovante">
+                                    <label class="btn btn-outline-primary" for="optComprovante"><i class="fa-solid fa-building-columns me-1"></i> Comprovante</label>
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="optRecibo" value="recibo">
+                                    <label class="btn btn-outline-primary" for="optRecibo"><i class="fa-solid fa-umbrella-beach me-1"></i> Recibo Férias</label>
+                                </div>
+                            </div>
+
+                            <div class="drop-zone mb-4" onclick="document.getElementById('fileInput').click()">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <h5>Clique ou arraste arquivos aqui</h5>
+                                <p id="fileStatus" class="mt-2 text-muted"></p>
+                                <input type="file" id="fileInput" multiple accept=".pdf" style="display: none" onchange="updateCount()">
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="btnSubmit">
+                                    <span id="btnText">Processar Arquivos</span>
+                                    <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="resultArea" class="card main-card d-none">
+                    <div class="card-header border-bottom-0 pt-3 bg-transparent">
+                        <h5 class="mb-0"><i class="fa-solid fa-list-check me-2"></i>Resultados</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Original</th>
+                                        <th>Novo Nome</th>
+                                        <th>Status</th>
+                                        <th class="text-center">Debug</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        function updateCount() {
-            const count = document.getElementById('fileInput').files.length;
-            document.getElementById('fileStatus').innerText = count > 0 ? `${count} arquivos na fila` : "Nenhum arquivo selecionado";
-        }
+    <div class="modal fade" id="logsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Logs do Servidor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-dark p-0">
+                    <div id="consoleOutput" class="console-output">Carregando...</div>
+                </div>
+                <div class="modal-footer bg-dark border-top-0">
+                    <button type="button" class="btn btn-success btn-sm" onclick="fetchLogs()">Atualizar</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function closeOverlay() {
-            document.getElementById('successOverlay').style.display = 'none';
-        }
+    <div class="modal fade" id="changelogModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fa-solid fa-clock-rotate-left me-2"></i>Histórico de Versões</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="changelogBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary w-100" onclick="closeChangelog()">Fechar Histórico</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function showDebug(text) {
-            // Abre uma janelinha pop-up com o texto cru
-            const win = window.open("", "Debug", "width=600,height=400");
-            win.document.write("<pre style='white-space: pre-wrap; font-family: monospace;'>" + text + "</pre>");
-        }
-
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const files = document.getElementById('fileInput').files;
-            if (files.length === 0) return alert("ERRO: Insira o disco na unidade (Selecione arquivos).");
-
-            const tipoDoc = document.querySelector('input[name="tipoDoc"]:checked').value;
-            const loading = document.getElementById('loadingOverlay');
-            const success = document.getElementById('successOverlay');
-            const resultArea = document.getElementById('resultArea');
-            const tableBody = document.getElementById('tableBody');
-
-            loading.style.display = "flex";
-            resultArea.style.display = "none";
-            tableBody.innerHTML = "";
-
-            const formData = new FormData();
-            formData.append('tipoDoc', tipoDoc);
-            for (let i = 0; i < files.length; i++) formData.append('files', files[i]);
-
-            try {
-                const response = await fetch('/upload', { method: 'POST', body: formData });
-                if (!response.ok) throw new Error("Falha na comunicação com o servidor.");
-                const data = await response.json();
-
-                loading.style.display = "none";
-                success.style.display = "flex";
-
-                // Preenche a tabela
-                data.lista.forEach(item => {
-                    const tr = document.createElement('tr');
-                    const classeStatus = item.status.includes("Falha") ? "status-err" : "status-ok";
-
-                    // Escapa as aspas para não quebrar o HTML do botão
-                    const safeDebug = item.debug.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-
-                    tr.innerHTML = `
-                            <td>${item.original}</td>
-                            <td>${item.novo}</td>
-                            <td class="${classeStatus}">${item.status}</td>
-                            <td style="text-align:center;">
-                                <button class="retro-btn" style="font-size:10px;" onclick='showDebug(${JSON.stringify(item.debug)})'>🔍 VER</button>
-                            </td>
-                        `;
-                    tableBody.appendChild(tr);
-                });
-
-                resultArea.style.display = "block";
-
-                // Download automático após fechar o overlay ou após delay
-                setTimeout(() => {
-                    downloadBase64File(data.arquivoZip, `arquivos_${tipoDoc}_processados.zip`);
-                }, 2000);
-
-            } catch (err) {
-                loading.style.display = "none";
-                alert("Erro Fatal: " + err.message);
-            }
-        });
-
-        function downloadBase64File(base64Data, fileName) {
-            const linkSource = `data:application/zip;base64,${base64Data}`;
-            const link = document.createElement("a");
-            link.href = linkSource;
-            link.download = fileName;
-            link.click();
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/changelog.js"></script>
+    <script src="js/site.js"></script>
 </body>
 </html>
