@@ -1,215 +1,387 @@
-<!DOCTYPE html>
-<html lang="pt-br" data-bs-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renomeador Pro | Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Renomeador Th Edition</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <style>
-        /* CSS Base */
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+      :root {
+        --bg-color: #e0f7fa; /* Azulzinho claro */
+        --paint-border: 3px solid #000;
+        --paint-shadow: 5px 5px 0px #000;
+        --primary: #ffeb3b; /* Amarelo Marca-texto */
+        --accent: #ff4081; /* Rosa Choque */
+        --success: #00e676; /* Verde Paint */
+        --dark: #212121;
+      }
+
+      body {
+        font-family: "Patrick Hand", cursive;
+        background-color: var(--bg-color);
+        background-image: radial-gradient(#000 1px, transparent 1px);
+        background-size: 20px 20px; /* Efeito de papel pontilhado */
+        margin: 0;
+        padding: 20px;
+        font-size: 1.2rem;
+      }
+
+      /* --- CAIXAS ESTILO PAINT --- */
+      .paint-box {
+        background: #fff;
+        border: var(--paint-border);
+        box-shadow: var(--paint-shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        position: relative;
+      }
+
+      .paint-header {
+        background: var(--accent);
+        color: white;
+        padding: 10px;
+        border: var(--paint-border);
+        margin: -30px -10px 20px -30px; /* Sai um pouco pra fora */
+        transform: rotate(-1deg);
+        text-align: center;
+        font-size: 1.5rem;
+        width: calc(100% + 40px);
+        box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      /* --- BOTÕES DESENHADOS --- */
+      .paint-btn {
+        background: var(--primary);
+        border: var(--paint-border);
+        box-shadow: var(--paint-shadow);
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.1s;
+        font-weight: bold;
+        display: inline-block;
+        margin: 5px;
+      }
+
+      .paint-btn:active {
+        transform: translate(4px, 4px);
+        box-shadow: 1px 1px 0px #000;
+      }
+
+      .paint-btn.secondary {
+        background: #fff;
+      }
+      .paint-btn.success {
+        background: var(--success);
+      }
+
+      /* --- INPUTS E RADIOS --- */
+      .radio-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .radio-option {
+        cursor: pointer;
+      }
+
+      .radio-option input[type="radio"] {
+        display: none;
+      }
+
+      .radio-option span {
+        display: block;
+        padding: 8px 15px;
+        border: var(--paint-border);
+        background: #fff;
+      }
+
+      .radio-option input:checked + span {
+        background: #00bcd4; /* Azul Cyan */
+        color: white;
+        box-shadow: 3px 3px 0px #000;
+        transform: scale(1.05) rotate(-2deg);
+      }
+
+      /* --- DROP ZONE --- */
+      .drop-zone {
+        border: 4px dashed #000;
+        background: #fff9c4;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .drop-zone:hover {
+        background: #fff;
+        transform: rotate(1deg);
+      }
+      .drop-zone i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        color: var(--accent);
+      }
+
+      /* --- TABELA --- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        border: 2px solid #000;
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background: #eee;
+      }
+
+      .status-tag {
+        background: #000;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 10px; /* Levemente arredondado pra parecer pincelada */
+        font-size: 0.9rem;
+      }
+      .status-tag.ok {
+        background: var(--success);
+        color: #000;
+        border: 2px solid #000;
+      }
+      .status-tag.err {
+        background: var(--accent);
+        color: #fff;
+        border: 2px solid #000;
+      }
+
+      /* --- MODAL CUSTOMIZADO --- */
+      .custom-modal {
+        display: none; /* Escondido por padrão */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(2px);
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 0;
+        border: var(--paint-border);
+        box-shadow: 10px 10px 0px #fff; /* Sombra branca pra destacar */
+        width: 80%;
+        max-width: 600px;
+        position: relative;
+      }
+      .modal-header {
+        background: var(--dark);
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .modal-body {
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .modal-footer {
+        padding: 15px;
+        text-align: right;
+        border-top: 2px solid #000;
+        background: #eee;
+      }
+
+      .close-btn {
+        background: red;
+        color: white;
+        border: 2px solid white;
+        font-weight: bold;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+      }
+
+      /* --- CONSOLE --- */
+      .console-screen {
+        background: #000;
+        color: #0f0;
+        font-family: "Courier New", monospace;
+        padding: 15px;
+        border: 4px inset #ccc;
+      }
+
+      /* --- UTILS --- */
+      .d-none {
+        display: none !important;
+      }
+      .blink {
+        animation: blinker 1s linear infinite;
+      }
+      @keyframes blinker {
+        50% {
+          opacity: 0;
         }
-
-        .main-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
-
-        .drop-zone {
-            border: 2px dashed #dee2e6;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background-color: var(--bs-body-bg);
-        }
-
-            .drop-zone:hover {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.05);
-            }
-
-            .drop-zone i {
-                font-size: 3rem;
-                color: #6c757d;
-                margin-bottom: 15px;
-            }
-
-        .console-output {
-            background-color: #1e1e1e;
-            color: #00ff00;
-            font-family: 'Consolas', monospace;
-            padding: 15px;
-            border-radius: 5px;
-            height: 400px;
-            overflow-y: auto;
-            font-size: 0.9rem;
-        }
-
-        .status-badge {
-            font-size: 0.85em;
-        }
-
-        /* --- MODO ESCURO --- */
-        [data-bs-theme="dark"] body {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-
-        [data-bs-theme="dark"] .main-card {
-            background-color: #1e1e1e;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        [data-bs-theme="dark"] .card-title {
-            color: #fff !important;
-        }
-
-        [data-bs-theme="dark"] .drop-zone {
-            border-color: #444;
-            background-color: #2c2c2c;
-        }
-
-            [data-bs-theme="dark"] .drop-zone:hover {
-                background-color: #333;
-                border-color: #0d6efd;
-            }
-
-            [data-bs-theme="dark"] .drop-zone i {
-                color: #adb5bd;
-            }
-
-        [data-bs-theme="dark"] .text-muted {
-            color: #adb5bd !important;
-        }
-
-        [data-bs-theme="dark"] .table {
-            color: #e0e0e0;
-        }
-
-        [data-bs-theme="dark"] .table-hover tbody tr:hover {
-            background-color: #333;
-            color: #fff;
-        }
+      }
     </style>
-</head>
-<body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="#"><i class="fa-solid fa-file-signature me-2"></i>Renomeador Pro</a>
-            <div>
-                <button class="btn btn-outline-light btn-sm me-2" onclick="openLogsModal()">
-                    <i class="fa-solid fa-terminal me-1"></i> Logs
-                </button>
-                <button class="btn btn-outline-light btn-sm" onclick="toggleTheme()" title="Alternar Tema">
-                    <i class="fa-solid fa-moon" id="themeIcon"></i>
-                </button>
-            </div>
+  </head>
+  <body>
+    <div style="max-width: 800px; margin: 0 auto">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+        "
+      >
+        <h1 style="font-size: 2.5rem; text-shadow: 3px 3px 0px #fff">
+          <i class="fa-solid fa-paintbrush"></i> Renomeador.exe
+        </h1>
+        <div>
+          <button class="paint-btn secondary" onclick="openLogsModal()">
+            <i class="fa-solid fa-terminal"></i> Logs
+          </button>
         </div>
-    </nav>
+      </div>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card main-card mb-4">
-                    <div class="card-body p-4">
-                        <h4 class="card-title mb-4 text-center">Processamento de Documentos</h4>
-                        <form id="uploadForm">
-                            <div class="mb-4 text-center">
-                                <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="optHolerite" value="holerite" checked>
-                                    <label class="btn btn-outline-primary" for="optHolerite"><i class="fa-regular fa-folder me-1"></i> Holerite</label>
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="optComprovante" value="comprovante">
-                                    <label class="btn btn-outline-primary" for="optComprovante"><i class="fa-solid fa-building-columns me-1"></i> Comprovante</label>
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="optRecibo" value="recibo">
-                                    <label class="btn btn-outline-primary" for="optRecibo"><i class="fa-solid fa-umbrella-beach me-1"></i> Recibo Férias</label>
-                                </div>
-                            </div>
+      <div class="paint-box">
+        <div class="paint-header">🎨 Estúdio de Documentos</div>
 
-                            <div class="drop-zone mb-4" onclick="document.getElementById('fileInput').click()">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <h5>Clique ou arraste arquivos aqui</h5>
-                                <p id="fileStatus" class="mt-2 text-muted"></p>
-                                <input type="file" id="fileInput" multiple accept=".pdf" style="display: none" onchange="updateCount()">
-                            </div>
+        <form id="uploadForm">
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="tipoDoc" value="holerite" checked />
+              <span>📁 Holerite</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="tipoDoc" value="comprovante" />
+              <span>🏦 Comprovante</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="tipoDoc" value="recibo" />
+              <span>🏖️ Recibo</span>
+            </label>
+          </div>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg" id="btnSubmit">
-                                    <span id="btnText">Processar Arquivos</span>
-                                    <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+          <div
+            class="drop-zone"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Arrastar arquivos aqui</h3>
+            <p style="font-size: 0.9rem; color: #666">
+              (Ou clique para buscar na pasta)
+            </p>
+            <div
+              id="fileStatus"
+              style="font-weight: bold; margin-top: 10px; color: blue"
+            ></div>
+            <input
+              type="file"
+              id="fileInput"
+              multiple
+              accept=".pdf"
+              style="display: none"
+              onchange="updateCount()"
+            />
+          </div>
 
-                <div id="resultArea" class="card main-card d-none">
-                    <div class="card-header border-bottom-0 pt-3 bg-transparent">
-                        <h5 class="mb-0"><i class="fa-solid fa-list-check me-2"></i>Resultados</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-4">Original</th>
-                                        <th>Novo Nome</th>
-                                        <th>Status</th>
-                                        <th class="text-center">Debug</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <div style="text-align: center; margin-top: 25px">
+            <button
+              type="submit"
+              class="paint-btn success"
+              id="btnSubmit"
+              style="font-size: 1.3rem; padding: 15px 40px"
+            >
+              <span id="btnText">✨ PROCESSAR MÁGICA ✨</span>
+              <span id="btnSpinner" class="d-none">⏳</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div
+        id="resultArea"
+        class="paint-box d-none"
+        style="transform: rotate(1deg)"
+      >
+        <h2
+          style="border-bottom: 4px solid var(--primary); display: inline-block"
+        >
+          📋 Resultado Final
+        </h2>
+        <div style="overflow-x: auto">
+          <table id="resultTable">
+            <thead>
+              <tr>
+                <th>Arquivo Original</th>
+                <th>Novo Nome</th>
+                <th>Status</th>
+                <th>RAW</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
         </div>
+      </div>
     </div>
 
-    <div class="modal fade" id="logsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">Logs do Servidor</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body bg-dark p-0">
-                    <div id="consoleOutput" class="console-output">Carregando...</div>
-                </div>
-                <div class="modal-footer bg-dark border-top-0">
-                    <button type="button" class="btn btn-success btn-sm" onclick="fetchLogs()">Atualizar</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                </div>
-            </div>
+    <div id="logsModal" class="custom-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>C:\SYSTEM\LOGS.TXT</span>
+          <button class="close-btn" onclick="closeModal('logsModal')">X</button>
         </div>
+        <div class="modal-body" style="background: #222">
+          <div id="consoleOutput" class="console-screen">Carregando...</div>
+        </div>
+        <div class="modal-footer">
+          <button class="paint-btn" onclick="fetchLogs()">🔄 Atualizar</button>
+          <button class="paint-btn secondary" onclick="closeModal('logsModal')">
+            Fechar
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="modal fade" id="changelogModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fa-solid fa-clock-rotate-left me-2"></i>Histórico de Versões</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="changelogBody">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100" onclick="closeChangelog()">Fechar Histórico</button>
-                </div>
-            </div>
+    <div id="changelogModal" class="custom-modal">
+      <div class="modal-content" style="border: 4px solid var(--accent)">
+        <div class="modal-header" style="background: var(--accent)">
+          <span>🚀 Novidades v5.5 (Paint Edition)</span>
+          <button class="close-btn" onclick="closeChangelog()">X</button>
         </div>
+        <div
+          class="modal-body"
+          id="changelogBody"
+          style="font-size: 1.1rem"
+        ></div>
+        <div class="modal-footer">
+          <button class="paint-btn" onclick="closeChangelog()">
+            Entendido!
+          </button>
+        </div>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/changelog.js"></script>
     <script src="js/site.js"></script>
-</body>
+  </body>
 </html>

@@ -13,35 +13,13 @@ namespace RenomeadorHolerite.Services
             {
                 using var document = PdfDocument.Open(pdfStream);
                 if (document.NumberOfPages == 0) return "";
-
                 var text = document.GetPage(1).Text;
 
-                // --- USANDO O NOVO LOGGER ---
-                InMemoryLogger.Log($"----------------------------------------");
+                // Log para Debug
                 InMemoryLogger.Log($"[PROCESSANDO] Tipo: {tipoDocumento}");
-                InMemoryLogger.Log($"[PREVIEW] {text.Substring(0, Math.Min(text.Length, 100)).Replace("\n", " ")}...");
-
-                string nomeEncontrado = "";
-
-                if (tipoDocumento == "comprovante")
-                {
-                    nomeEncontrado = ExtrairDeComprovante(text);
-                }
-                else if (tipoDocumento == "recibo")
-                {
-                    nomeEncontrado = ExtrairDeRecibo(text);
-                }
-                else
-                {
-                    nomeEncontrado = ExtrairDeHolerite(text);
-                }
-
-                if (!string.IsNullOrEmpty(nomeEncontrado))
-                    InMemoryLogger.Log($"[SUCESSO] Nome extraído: {nomeEncontrado}");
-                else
-                    InMemoryLogger.Log($"[FALHA] Não foi possível identificar o nome.");
-
-                return nomeEncontrado;
+                if (tipoDocumento == "comprovante") return ExtrairDeComprovante(text);
+                if (tipoDocumento == "recibo") return ExtrairDeRecibo(text);
+                return ExtrairDeHolerite(text);
             }
             catch (Exception ex)
             {
@@ -68,30 +46,30 @@ namespace RenomeadorHolerite.Services
 
         private string ExtrairDeRecibo(string text)
         {
-            var padraoRecebi = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+)Recebi da firma";
-            var match = Regex.Match(text, padraoRecebi);
+            // ESTRATÉGIA 1 (A SALVAÇÃO): Âncora no CPF
+            // O texto vem sujo assim: "1.875,59ADRIANA...OLIVEIRACPF184..."
+            // A regex busca letras ([A-Z...]+) que terminam exatamente onde começa "CPF"
+            var padraoCpf = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]{5,})CPF";
+            var match = Regex.Match(text, padraoCpf);
             if (match.Success)
             {
                 var nome = match.Groups[1].Value.Trim();
-                if (nome.Length > 5) return LimparNome(nome);
+                // Filtra falsos positivos (como nomes de colunas)
+                if (!nome.Contains("BASE") && !nome.Contains("CÁLCULO"))
+                {
+                    return LimparNome(nome);
+                }
             }
 
-            var padraoOng = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+)ONG\s?-";
+            // ESTRATÉGIA 2: Âncora no "Recebi da firma" (Caso Arilene)
+            var padraoRecebi = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]{5,})(?:CPF|[\d\.\-\/\s]+)*Recebi da firma";
+            match = Regex.Match(text, padraoRecebi);
+            if (match.Success) return LimparNome(match.Groups[1].Value);
+
+            // ESTRATÉGIA 3: Rodapé (ONG)
+            var padraoOng = @"([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]{5,})ONG\s?-";
             match = Regex.Match(text, padraoOng);
-            if (match.Success)
-            {
-                var nome = match.Groups[1].Value.Trim();
-                if (nome.Length > 5) return LimparNome(nome);
-            }
-
-            var padraoGeral = @"Nome do empregado.*?([A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]{10,})";
-            match = Regex.Match(text, padraoGeral);
-            if (match.Success)
-            {
-                var nomeSujo = match.Groups[1].Value;
-                var matchLimpo = Regex.Match(nomeSujo, @"[A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$");
-                if (matchLimpo.Success) return LimparNome(matchLimpo.Value);
-            }
+            if (match.Success) return LimparNome(match.Groups[1].Value);
 
             return "";
         }
@@ -99,15 +77,19 @@ namespace RenomeadorHolerite.Services
         private string LimparNome(string nomeBruto)
         {
             var nome = nomeBruto.Trim();
-            var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO", "DO EMPREGADO", "EMPREGADO" };
+            var sujeiras = new[] { "CÓDIGO", "CODIGO", "MATRÍCULA", "MATRICULA", "NOME", "CC", "FAVORECIDO", "DO EMPREGADO", "EMPREGADO", "TOTAL", "LÍQUIDO", "LIQUIDO" };
             foreach (var s in sujeiras)
             {
                 if (nome.Contains(s, StringComparison.OrdinalIgnoreCase))
                     nome = nome.Replace(s, "", StringComparison.OrdinalIgnoreCase).Trim();
             }
+
             nome = RemoverAcentos(nome);
             nome = Regex.Replace(nome, @"[^a-zA-Z\s]", "").Trim();
+
+            // Corte de segurança
             if (nome.Length > 30) nome = nome.Substring(0, 30).Trim();
+
             return nome;
         }
 
@@ -116,10 +98,12 @@ namespace RenomeadorHolerite.Services
             if (string.IsNullOrWhiteSpace(texto)) return texto;
             var normalizedString = texto.Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder();
+
             foreach (var c in normalizedString)
             {
                 var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark) stringBuilder.Append(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                    stringBuilder.Append(c);
             }
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }

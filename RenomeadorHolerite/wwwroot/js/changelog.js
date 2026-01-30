@@ -2,7 +2,16 @@
 
 const appVersions = [
     {
-        version: "v5.0 - The Modern Era (Atual)",
+        version: "v5.1 - Stability Update (Hotfix)",
+        color: "text-success",
+        items: [
+            "🐛 <b>Correção em Recibos:</b> Resolvido erro onde o nome ficava colado no valor (ex: '1.000,00MARIA').",
+            "⚓ <b>Regex Inteligente:</b> Nova lógica de âncora baseada em 'CPF' para extração cirúrgica.",
+            "🛡️ <b>Blindagem:</b> Proteção contra textos 'espremidos' sem quebra de linha."
+        ]
+    },
+    {
+        version: "v5.0 - The Modern Era",
         color: "text-primary",
         items: [
             "✨ <b>Redesign Completo:</b> Migração para Bootstrap 5 e ícones FontAwesome.",
@@ -73,7 +82,7 @@ function renderChangelog() {
         htmlContent += `</ul>`;
     });
 
-    // É AQUI QUE O CHECKBOX É CRIADO
+    // Cria o Checkbox de "Não mostrar novamente"
     htmlContent += `
         <div class="alert alert-light border mt-4 text-center small bg-opacity-10">
             <div class="form-check d-inline-block">
